@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070c0f">
+<title>The Lighthouse at Dunmoor</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{box-sizing:border-box;color-scheme:dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#070c0f;--fg:#d6dfdd;--muted:#7b8d90;--card:#0e171b;--line:#22343a;--blood:#d0594c;--lamp:#ffc94a;--glow:rgba(255,201,74,.45)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0,#10222a 0,var(--bg) 60%) var(--bg);color:var(--fg);font:19px/1.65 Georgia,"Iowan Old Style","Times New Roman",serif}
+main{max-width:34rem;margin:0 auto;padding:22px 20px 56px}
+header{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.lamp{flex:none;width:18px;height:18px;border-radius:50%;background:var(--line);opacity:.4;animation:fl 3.2s infinite}
+.lamp.lit{background:var(--lamp);opacity:1;animation:none;box-shadow:0 0 0 6px var(--glow),0 0 40px 14px var(--glow)}
+@keyframes fl{0%,100%{opacity:.2}35%{opacity:.55}50%{opacity:.1}70%{opacity:.45}}
+h1{font-size:1.3rem;line-height:1.2;margin:0;font-weight:700;flex:1}
+.menu{font:14px system-ui,sans-serif;min-height:0;padding:6px 12px;color:var(--muted)}
+.inv{font:15px/1.4 system-ui,-apple-system,sans-serif;color:var(--muted);margin:0 0 26px;padding-bottom:14px;border-bottom:1px solid var(--line);min-height:1.4em}
+.scene{margin:0 0 26px}
+.scene h2{font-size:1.15rem;font-style:italic;font-weight:400;color:var(--muted);margin:0 0 8px}
+.scene h2.dead{color:var(--blood);font-size:1.4rem}
+.scene h2.win{color:var(--lamp);font-size:1.4rem}
+.scene p{margin:0 0 .85em}
+.note{font:15px/1.4 system-ui,-apple-system,sans-serif;color:var(--muted);border-left:3px solid var(--line);padding-left:10px}
+#choices{display:grid;gap:10px}
+button{font:inherit;font-size:1rem;text-align:left;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;min-height:48px}
+button:hover{border-color:var(--muted)}
+button:focus-visible{outline:3px solid var(--lamp);outline-offset:2px}
+button.call{border-color:#5a2a26;color:#e2a8a1}
+button.again{background:var(--lamp);border-color:var(--lamp);color:#1a1405;font-weight:700}
+@media (prefers-reduced-motion:reduce){.lamp{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="lamp" id="lamp"></div><h1>The Lighthouse at Dunmoor</h1><button class="menu" id="menu">Menu</button></header>
+<p class="inv" id="inv" aria-live="polite"></p>
+<div id="story"></div>
+<div id="choices"></div>
+</main>
+<script>
+const ITEMS={key:"Brass key",oil:"Oil can",match:"Matches",journal:"Keeper’s journal",scarf:"Jenkins’s scarf"};
+const CALL={t:"Call out for Jenkins",to:"name",cls:"call"};
+const S={
+start:{t:"Dusk on the shore",x:["You wake face-down in cold sand with salt in your mouth. The storm has passed, and the light is going fast.","Jenkins was in the boat with you. He isn’t here. Above the cliffs stands Dunmoor Light, its great lamp dark. Far out on the black water, small lights glimmer, steady and patient."],
+c:[{t:"Search the wreckage",to:"wreck"},{t:"Climb the path to the lighthouse",to:"door"},{t:"Swim toward the lights on the horizon",to:"cold"},CALL]},
+wreck:{t:"The wreckage",get:["key","scarf"],x:["Splintered planks, tangled rope. A brass key hangs from a loop of wire, tagged Dunmoor Light.","Wedged beneath a plank is Jenkins’s scarf, soaked and cold. There is no sign of him anywhere."],
+c:[{t:"Climb the path to the lighthouse",to:"door"},{t:"Go back to the shore",to:"start"},CALL]},
+door:{t:"The lighthouse door",x:()=>{const r=["The tower looms, white paint peeling to bare stone. The oak door is shut tight. The sun is nearly down, and the gulls have gone quiet.","A narrow track leads around the side of the building."];if(inv.has("key"))r.push("Once you step inside, you won’t be coming out again before morning. Whatever you need, you had better have it first.");return r},
+c:[{t:"Unlock the door with the brass key",to:"hall",if:"key"},{t:"Follow the track around the tower",to:"shed"},{t:"Go back down to the shore",to:"start"},CALL]},
+shed:{t:"The keeper’s shed",get:["oil","match"],x:["A leaning shed hides from the wind. On a swept shelf sit a can of lamp oil and a tin of dry matches, as if someone left them out for you."],
+c:[{t:"Return to the front door",to:"door"}]},
+hall:{t:"The ground floor",night:1,x:["The door shuts behind you. The room is round and smells of salt and old smoke. A spiral stair climbs into darkness, and a hatch in the floor leads down.","Then, from outside, a knock. Slow. Three times.","“Hey. It’s me.” Jenkins. “I’m freezing. Open the door.”"],
+c:[{t:"Climb the stairs",to:"stairs",if:"match"},{t:"Climb the stairs in the dark",to:"dark",no:"match"},{t:"Open the cellar hatch",to:"cellar"},{t:"Open the door",to:"letin"},CALL]},
+cellar:{t:"The cellar",get:["journal"],x:["Cold air and the smell of wet stone. Names are scratched into every wall, hundreds of them, and every one is crossed out. Near the floor, a single line is left untouched: “A name said aloud is a door.”","On a barrel lies the keeper’s journal. He never writes a name in it. His assistant is only “the boy”. The last page holds three rules:","1. Feed the lamp before dark, and work the crank before you strike the flame.","2. Never open the door after dark.","3. It learns the voices of the lost. Do not answer it.","Overhead, faintly, someone is still knocking."],
+c:[{t:"Climb back to the ground floor",to:"hall"}]},
+stairs:{t:"The stairs",x:["You strike a match. The flame shows a hundred and forty steps and nothing else, but something below is breathing in time with you.","Behind you, in Jenkins’s voice: “Wait. Don’t leave me down here.”"],
+c:[{t:"Keep climbing",to:"top"},CALL]},
+top:{t:"The lamp room",x:()=>["A ring of glass, black with night. The great lens waits in the middle, with a brass crank at its base and an empty oil basin beneath. The voice outside still calls.",inv.has("oil")&&inv.has("match")?"You have what you need.":"The basin is dry, and you have nothing to light it with."],
+c:[{t:"Fill the lamp, work the crank, then light it",to:"night1",if:["oil","match","journal"]},{t:"Fill the lamp and light it",to:"weak",if:["oil","match"],no:"journal"},{t:"Go back down",to:"hall"},CALL]},
+night1:{t:"The lamp burns",lit:1,x:["You pour the oil, work the crank until the lens grinds free, and only then strike the flame. A white beam sweeps the water, and the lights on the horizon go out one by one.","The voice changes. “Please. You know me. I’m so cold.”"],
+c:[{t:"Stay quiet and keep the flame fed",to:"night2"},CALL]},
+night2:{t:"Midnight",lit:1,x:["The beam turns, and turns. The voice below knows things now: the name of your street, the song he hummed in the boat, the thing you never told anyone. It sounds more like him than he ever did.","“Why won’t you answer me?”"],
+c:[{t:"Keep feeding the flame",to:"night3"},CALL]},
+night3:{t:"The last hour",lit:1,x:["The voice drops and stops pleading. Something that has never learned to be kind says, very patiently: “I can wait.”","Wind rattles the glass. The flame shudders but holds. The sky behind the windows begins, very slowly, to grey."],
+c:[{t:"Hold on until dawn",to:"dawn"},CALL]},
+dawn:{t:"Dawn",end:"win",lit:1,x:["The sun clears the horizon and the voice stops mid-word. Somewhere below, the door settles quietly on its hinges.","A fishing boat finds you by midmorning. The crew search the shore and the cliffs, shouting Jenkins’s name until their voices crack. They find nothing.","You leave Dunmoor with his scarf in your hands. You’re alive, and you’ll never know what happened to him. And you’re no longer sure you could tell his real voice from the thing that took it."]},
+cold:{t:"The Cold Dark",end:"dead",x:["You wade in and swim toward the lights. They never get closer. They aren’t ships, and they have never been ships.","The water is so cold that it stops hurting. Far below, the lights turn to look at you."]},
+letin:{t:"Let Him In",end:"dead",x:["You tell yourself it’s Jenkins. The bolt slides back, and the cold comes in like water.","“Thank you,” says the voice, and it’s still his voice. It is the last thing you hear."]},
+dark:{t:"The Dark Stairs",end:"dead",x:["You climb without a light. By the twentieth step you are counting. By the fortieth you notice that you’re hearing two sets of footsteps.","On the sixtieth, the second set stops beside you."]},
+weak:{t:"The Weak Light",end:"dead",x:["You fill the lamp and strike a flame, but the lens never turns. The beam doesn’t sweep. It only glows, a small steady point on the black water, like a candle in a window.","Something answers that kind of light. You hear the tower creak, then the stairs, then every step of the stairs."]},
+name:{t:"The Name",end:"dead",x:["“Jenkins!” The word is out before you think. It fills the stairwell, the tower, the dark.","Silence. Then, from right beside you, softly, in his voice: “Yes?”","A name said aloud is a door."]}
+};
+const $=s=>document.querySelector(s),story=$("#story"),ch=$("#choices"),lamp=$("#lamp"),invEl=$("#inv");
+const K="dunmoor-save-v2",E="dunmoor-ends-v2";
+let inv=new Set();
+const rd=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+const wr=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const ends=()=>rd(E)||[];
+const ok=c=>[].concat(c.if||[]).every(k=>inv.has(k))&&![].concat(c.no||[]).some(k=>inv.has(k));
+function btn(t,f,cls){const b=document.createElement("button");b.textContent=t;if(cls)b.className=cls;b.onclick=f;ch.append(b)}
+function para(p,t,cls){const e=document.createElement("p");if(cls)e.className=cls;e.textContent=t;p.append(e)}
+function head(d,t,cls){const h=document.createElement("h2");if(cls)h.className=cls;h.textContent=t;d.append(h)}
+function items(){const l=[...inv].filter(k=>ITEMS[k]).map(k=>ITEMS[k]);invEl.textContent="Carrying: "+(l.length?l.join(", "):"nothing")}
+function fresh(){inv=new Set();wr(K,null);go("start")}
+function title(){
+  story.replaceChildren();ch.replaceChildren();invEl.textContent="";lamp.className="lamp";
+  const d=document.createElement("section");d.className="scene";
+  head(d,"A night at Dunmoor");
+  para(d,"The lamp is dark, and something is waiting in the water. Survive until dawn.");
+  para(d,"Endings found: "+ends().length+" of 6","note");
+  story.append(d);
+  const sv=rd(K);
+  if(sv&&S[sv.id])btn("Continue",()=>{inv=new Set(sv.inv);go(sv.id)},"again");
+  btn("New game",fresh);
+}
+function go(id){
+  const s=S[id],nw=(s.get||[]).filter(k=>!inv.has(k));
+  nw.forEach(k=>inv.add(k));if(s.night)inv.add("night");
+  if(!s.end)wr(K,{id,inv:[...inv]});
+  story.replaceChildren();ch.replaceChildren();items();
+  lamp.className="lamp"+(s.lit?" lit":"");
+  const d=document.createElement("section");d.className="scene";
+  head(d,s.t,s.end);
+  (typeof s.x==="function"?s.x():s.x).forEach(t=>para(d,t));
+  if(nw.length)para(d,"You take: "+nw.map(k=>ITEMS[k]).join(", "),"note");
+  if(s.end){const e=ends();if(!e.includes(id)){e.push(id);wr(E,e)}para(d,"Endings found: "+ends().length+" of 6","note")}
+  story.append(d);
+  if(s.end){const sv=rd(K);if(sv&&S[sv.id])btn("Try again from your last save",()=>{inv=new Set(sv.inv);go(sv.id)},"again");btn("Start over",fresh)}
+  else s.c.filter(ok).forEach(c=>btn(c.t,()=>go(c.to),c.cls));
+  window.scrollTo(0,0);
+}
+$("#menu").onclick=title;
+title();
+</script>
+<script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
+</body>
+</html>
