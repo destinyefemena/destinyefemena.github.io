@@ -39,7 +39,7 @@ button.again{background:var(--lamp);border-color:var(--lamp);color:#1a1405;font-
 </head>
 <body>
 <main>
-<header><div class="lamp" id="lamp"></div><h1>The Lighthouse at Dunmoor</h1><button class="menu" id="menu">Menu</button></header>
+<header><div class="lamp" id="lamp"></div><h1>The Lighthouse at Dunmoor</h1><button class="menu" id="snd"></button><button class="menu" id="menu">Menu</button></header>
 <p class="inv" id="inv" aria-live="polite"></p>
 <div id="story"></div>
 <div id="choices"></div>
@@ -56,26 +56,26 @@ door:{t:"The lighthouse door",x:()=>{const r=["The tower looms, white paint peel
 c:[{t:"Unlock the door with the brass key",to:"hall",if:"key"},{t:"Follow the track around the tower",to:"shed"},{t:"Go back down to the shore",to:"start"},CALL]},
 shed:{t:"The keeper’s shed",get:["oil","match"],x:["A leaning shed hides from the wind. On a swept shelf sit a can of lamp oil and a tin of dry matches, as if someone left them out for you."],
 c:[{t:"Return to the front door",to:"door"}]},
-hall:{t:"The ground floor",night:1,x:["The door shuts behind you. The room is round and smells of salt and old smoke. A spiral stair climbs into darkness, and a hatch in the floor leads down.","Then, from outside, a knock. Slow. Three times.","“Hey. It’s me.” Jenkins. “I’m freezing. Open the door.”"],
+hall:{t:"The ground floor",fx:"knock",night:1,x:["The door shuts behind you. The room is round and smells of salt and old smoke. A spiral stair climbs into darkness, and a hatch in the floor leads down.","Then, from outside, a knock. Slow. Three times.","“Hey. It’s me.” Jenkins. “I’m freezing. Open the door.”"],
 c:[{t:"Climb the stairs",to:"stairs",if:"match"},{t:"Climb the stairs in the dark",to:"dark",no:"match"},{t:"Open the cellar hatch",to:"cellar"},{t:"Open the door",to:"letin"},CALL]},
 cellar:{t:"The cellar",get:["journal"],x:["Cold air and the smell of wet stone. Names are scratched into every wall, hundreds of them, and every one is crossed out. Near the floor, a single line is left untouched: “A name said aloud is a door.”","On a barrel lies the keeper’s journal. He never writes a name in it. His assistant is only “the boy”. The last page holds three rules:","1. Feed the lamp before dark, and work the crank before you strike the flame.","2. Never open the door after dark.","3. It learns the voices of the lost. Do not answer it.","Overhead, faintly, someone is still knocking."],
 c:[{t:"Climb back to the ground floor",to:"hall"}]},
-stairs:{t:"The stairs",x:["You strike a match. The flame shows a hundred and forty steps and nothing else, but something below is breathing in time with you.","Behind you, in Jenkins’s voice: “Wait. Don’t leave me down here.”"],
+stairs:{t:"The stairs",fx:"steps",x:["You strike a match. The flame shows a hundred and forty steps and nothing else, but something below is breathing in time with you.","Behind you, in Jenkins’s voice: “Wait. Don’t leave me down here.”"],
 c:[{t:"Keep climbing",to:"top"},CALL]},
 top:{t:"The lamp room",x:()=>["A ring of glass, black with night. The great lens waits in the middle, with a brass crank at its base and an empty oil basin beneath. The voice outside still calls.",inv.has("oil")&&inv.has("match")?"You have what you need.":"The basin is dry, and you have nothing to light it with."],
 c:[{t:"Fill the lamp, work the crank, then light it",to:"night1",if:["oil","match","journal"]},{t:"Fill the lamp and light it",to:"weak",if:["oil","match"],no:"journal"},{t:"Go back down",to:"hall"},CALL]},
-night1:{t:"The lamp burns",lit:1,x:["You pour the oil, work the crank until the lens grinds free, and only then strike the flame. A white beam sweeps the water, and the lights on the horizon go out one by one.","The voice changes. “Please. You know me. I’m so cold.”"],
+night1:{t:"The lamp burns",fx:"ignite",lit:1,x:["You pour the oil, work the crank until the lens grinds free, and only then strike the flame. A white beam sweeps the water, and the lights on the horizon go out one by one.","The voice changes. “Please. You know me. I’m so cold.”"],
 c:[{t:"Stay quiet and keep the flame fed",to:"night2"},CALL]},
 night2:{t:"Midnight",lit:1,x:["The beam turns, and turns. The voice below knows things now: the name of your street, the song he hummed in the boat, the thing you never told anyone. It sounds more like him than he ever did.","“Why won’t you answer me?”"],
 c:[{t:"Keep feeding the flame",to:"night3"},CALL]},
 night3:{t:"The last hour",lit:1,x:["The voice drops and stops pleading. Something that has never learned to be kind says, very patiently: “I can wait.”","Wind rattles the glass. The flame shudders but holds. The sky behind the windows begins, very slowly, to grey."],
 c:[{t:"Hold on until dawn",to:"dawn"},CALL]},
-dawn:{t:"Dawn",end:"win",lit:1,x:["The sun clears the horizon and the voice stops mid-word. Somewhere below, the door settles quietly on its hinges.","A fishing boat finds you by midmorning. The crew search the shore and the cliffs, shouting Jenkins’s name until their voices crack. They find nothing.","You leave Dunmoor with his scarf in your hands. You’re alive, and you’ll never know what happened to him. And you’re no longer sure you could tell his real voice from the thing that took it."]},
-cold:{t:"The Cold Dark",end:"dead",x:["You wade in and swim toward the lights. They never get closer. They aren’t ships, and they have never been ships.","The water is so cold that it stops hurting. Far below, the lights turn to look at you."]},
-letin:{t:"Let Him In",end:"dead",x:["You tell yourself it’s Jenkins. The bolt slides back, and the cold comes in like water.","“Thank you,” says the voice, and it’s still his voice. It is the last thing you hear."]},
-dark:{t:"The Dark Stairs",end:"dead",x:["You climb without a light. By the twentieth step you are counting. By the fortieth you notice that you’re hearing two sets of footsteps.","On the sixtieth, the second set stops beside you."]},
-weak:{t:"The Weak Light",end:"dead",x:["You fill the lamp and strike a flame, but the lens never turns. The beam doesn’t sweep. It only glows, a small steady point on the black water, like a candle in a window.","Something answers that kind of light. You hear the tower creak, then the stairs, then every step of the stairs."]},
-name:{t:"The Name",end:"dead",x:["“Jenkins!” The word is out before you think. It fills the stairwell, the tower, the dark.","Silence. Then, from right beside you, softly, in his voice: “Yes?”","A name said aloud is a door."]}
+dawn:{t:"Dawn",fx:"dawn",end:"win",lit:1,x:["The sun clears the horizon and the voice stops mid-word. Somewhere below, the door settles quietly on its hinges.","A fishing boat finds you by midmorning. The crew search the shore and the cliffs, shouting Jenkins’s name until their voices crack. They find nothing.","You leave Dunmoor with his scarf in your hands. You’re alive, and you’ll never know what happened to him. And you’re no longer sure you could tell his real voice from the thing that took it."]},
+cold:{t:"The Cold Dark",fx:"dead",end:"dead",x:["You wade in and swim toward the lights. They never get closer. They aren’t ships, and they have never been ships.","The water is so cold that it stops hurting. Far below, the lights turn to look at you."]},
+letin:{t:"Let Him In",fx:"dead",end:"dead",x:["You tell yourself it’s Jenkins. The bolt slides back, and the cold comes in like water.","“Thank you,” says the voice, and it’s still his voice. It is the last thing you hear."]},
+dark:{t:"The Dark Stairs",fx:"dead",end:"dead",x:["You climb without a light. By the twentieth step you are counting. By the fortieth you notice that you’re hearing two sets of footsteps.","On the sixtieth, the second set stops beside you."]},
+weak:{t:"The Weak Light",fx:"dead",end:"dead",x:["You fill the lamp and strike a flame, but the lens never turns. The beam doesn’t sweep. It only glows, a small steady point on the black water, like a candle in a window.","Something answers that kind of light. You hear the tower creak, then the stairs, then every step of the stairs."]},
+name:{t:"The Name",fx:"dead",end:"dead",x:["“Jenkins!” The word is out before you think. It fills the stairwell, the tower, the dark.","Silence. Then, from right beside you, softly, in his voice: “Yes?”","A name said aloud is a door."]}
 };
 const $=s=>document.querySelector(s),story=$("#story"),ch=$("#choices"),lamp=$("#lamp"),invEl=$("#inv");
 const K="dunmoor-save-v2",E="dunmoor-ends-v2";
@@ -84,6 +84,16 @@ const rd=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null
 const wr=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const ends=()=>rd(E)||[];
 const ok=c=>[].concat(c.if||[]).every(k=>inv.has(k))&&![].concat(c.no||[]).some(k=>inv.has(k));
+const SK="dunmoor-sound";
+let snd=rd(SK)!==false,ac=null;
+const VIB={knock:[80,470,80,470,80],steps:[40,220,40],ignite:[60],dawn:[60,90,60],dead:[400,120,400]};
+function ctx(){if(!ac){try{ac=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(ac&&ac.state==="suspended")ac.resume();return ac}
+function tone(f,t,d,ty,g,f2){const c=ac,n=c.currentTime+t,o=c.createOscillator(),v=c.createGain();o.type=ty;o.frequency.setValueAtTime(f,n);if(f2)o.frequency.exponentialRampToValueAtTime(f2,n+d);v.gain.setValueAtTime(.0001,n);v.gain.exponentialRampToValueAtTime(g,n+.03);v.gain.exponentialRampToValueAtTime(.0001,n+d);o.connect(v);v.connect(c.destination);o.start(n);o.stop(n+d+.05)}
+const FX={knock:()=>[0,.6,1.2].forEach(t=>tone(110,t,.16,"triangle",.6,50)),steps:()=>[0,.5].forEach(t=>tone(70,t,.14,"triangle",.4,45)),ignite:()=>tone(180,0,.8,"triangle",.3,520),dawn:()=>[523,659,784].forEach((f,i)=>tone(f,i*.3,1.6,"sine",.22)),dead:()=>{tone(70,0,2.2,"sawtooth",.18,28);tone(52,0,2.4,"sine",.4,22)}};
+function play(k){if(!snd)return;if(ctx())try{FX[k]()}catch(e){}if(typeof navigator!=="undefined"&&navigator.vibrate)try{navigator.vibrate(VIB[k])}catch(e){}}
+function sndLabel(){$("#snd").textContent=snd?"Sound on":"Sound off"}
+$("#snd").onclick=()=>{snd=!snd;wr(SK,snd);sndLabel();if(snd)ctx()};
+sndLabel();
 function btn(t,f,cls){const b=document.createElement("button");b.textContent=t;if(cls)b.className=cls;b.onclick=f;ch.append(b)}
 function para(p,t,cls){const e=document.createElement("p");if(cls)e.className=cls;e.textContent=t;p.append(e)}
 function head(d,t,cls){const h=document.createElement("h2");if(cls)h.className=cls;h.textContent=t;d.append(h)}
@@ -115,6 +125,7 @@ function go(id){
   if(s.end){const sv=rd(K);if(sv&&S[sv.id])btn("Try again from your last save",()=>{inv=new Set(sv.inv);go(sv.id)},"again");btn("Start over",fresh)}
   else s.c.filter(ok).forEach(c=>btn(c.t,()=>go(c.to),c.cls));
   window.scrollTo(0,0);
+  if(s.fx)play(s.fx);
 }
 $("#menu").onclick=title;
 title();
